@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Subnetting Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tab:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .calculator {
+            background: white;
+            border-radius: 0 15px 15px 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button.calc-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        button.calc-btn:hover {
+            transform: scale(1.02);
+        }
+        
+        button.calc-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+        
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: #27ae60;
+        }
+        
+        .copy-all-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        .copy-all-btn:hover {
+            transform: scale(1.02);
+        }
+        
+        .copy-all-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .result-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .result-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .subnet-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .subnet-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #764ba2;
+        }
+        
+        .binary {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .vlsm-input {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 2px dashed #667eea;
+        }
+        
+        .vlsm-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .add-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .error {
+            background: #ffe6e6;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            margin-top: 20px;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Ultimate Subnetting Calculator</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">📊 Equal Subnets</button>
+            <button class="tab" onclick="switchTab(1)">👥 Hosts per Subnet</button>
+            <button class="tab" onclick="switchTab(2)">🎯 VLSM Calculator</button>
+            <button class="tab" onclick="switchTab(3)">🔍 IP Analysis</button>
+            <button class="tab" onclick="switchTab(4)">🤝 Same Subnet?</button>
+            <button class="tab" onclick="switchTab(5)">🔄 Convert Notation</button>
+        </div>
+        
+        <div class="calculator">
+            <!-- Tab 1: Equal Subnets -->
+            <div class="tab-content active" id="tab0">
+                <h2>Divide Network into Equal Subnets</h2>
+                <div class="input-group">
+                    <label>Network Address (e.g., 192.168.1.0)</label>
+                    <input type="text" id="net1" placeholder="192.168.1.0">
+                </div>
+                <div class="input-group">
+                    <label>Current Subnet Mask (CIDR or dotted, e.g., /24 or 255.255.255.0)</label>
+                    <input type="text" id="mask1" placeholder="/24">
+                </div>
+                <div class="input-group">
+                    <label>Number of Subnets Needed</label>
+                    <input type="number" id="subnets1" placeholder="4" min="2">
+                </div>
+                <button class="calc-btn" onclick="calculateEqualSubnets()">Calculate 🚀</button>
+                <div class="results" id="results1"></div>
+            </div>
+            
+            <!-- Tab 2: Hosts per Subnet -->
+            <div class="tab-content" id="tab1">
+                <h2>Calculate Subnet for Required Hosts</h2>
+                <div class="input-group">
+                    <label>Network Address (e.g., 10.0.0.0)</label>
+                    <input type="text" id="net2" placeholder="10.0.0.0">
+                </div>
+                <div class="input-group">
+                    <label>Current Subnet Mask</label>
+                    <input type="text" id="mask2" placeholder="/16">
+                </div>
+                <div class="input-group">
+                    <label>Hosts Required per Subnet</label>
+                    <input type="number" id="hosts2" placeholder="500" min="2">
+                </div>
+                <button class="calc-btn" onclick="calculateHostsSubnet()">Calculate 🚀</button>
+                <div class="results" id="results2"></div>
+            </div>
+            
+            <!-- Tab 3: VLSM -->
+            <div class="tab-content" id="tab2">
+                <h2>VLSM - Variable Length Subnet Masking</h2>
+                <div class="input-group">
+                    <label>Base Network Address</label>
+                    <input type="text" id="netVLSM" placeholder="172.16.0.0">
+                </div>
+                <div class="input-group">
+                    <label>Base Subnet Mask</label>
+                    <input type="text" id="maskVLSM" placeholder="/16">
+                </div>
+                
+                <div id="vlsmInputs">
+                    <div class="vlsm-input">
+                        <div class="vlsm-row">
+                            <div>
+                                <label>Department/Subnet Name</label>
+                                <input type="text" class="vlsm-name" placeholder="Sales Department">
+                            </div>
+                            <div>
+                                <label>Hosts Needed</label>
+                                <input type="number" class="vlsm-hosts" placeholder="100" min="2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="add-btn" onclick="addVLSMRow()">+ Add Another Subnet</button>
+                <button class="calc-btn" onclick="calculateVLSM()">Calculate VLSM 🚀</button>
+                <div class="results" id="resultsVLSM"></div>
+            </div>
+            
+            <!-- Tab 4: IP Analysis -->
+            <div class="tab-content" id="tab3">
+                <h2>Analyze IP Address & Subnet</h2>
+                <div class="input-group">
+                    <label>IP Address</label>
+                    <input type="text" id="ip4" placeholder="192.168.1.45">
+                </div>
+                <div class="input-group">
+                    <label>Subnet Mask</label>
+                    <input type="text" id="mask4" placeholder="/26">
+                </div>
+                <button class="calc-btn" onclick="analyzeIP()">Analyze 🚀</button>
+                <div class="results" id="results4"></div>
+            </div>
+            
+            <!-- Tab 5: Same Subnet Check -->
+            <div class="tab-content" id="tab4">
+                <h2>Check if IPs are in Same Subnet</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="input-group">
+                            <label>First IP Address</label>
+                            <input type="text" id="ip5a" placeholder="192.168.1.50">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <label>Second IP Address</label>
+                            <input type="text" id="ip5b" placeholder="192.168.1.100">
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Subnet Mask</label>
+                    <input type="text" id="mask5" placeholder="/25">
+                </div>
+                <button class="calc-btn" onclick="checkSameSubnet()">Check 🚀</button>
+                <div class="results" id="results5"></div>
+            </div>
+            
+            <!-- Tab 6: Convert Notation -->
+            <div class="tab-content" id="tab5">
+                <h2>Convert Between Subnet Notations</h2>
+                <div class="input-group">
+                    <label>Enter Subnet Mask (CIDR or Dotted Decimal)</label>
+                    <input type="text" id="convert6" placeholder="/24 or 255.255.255.0">
+                </div>
+                <button class="calc-btn" onclick="convertNotation()">Convert 🚀</button>
+                <div class="results" id="results6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 0;
+        
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✓ Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
+        function copySection(button) {
+            const section = button.closest('.result-section');
+            let text = '';
+            
+            const title = section.querySelector('h3');
+            if (title) {
+                text += title.textContent + '\n';
+                text += '='.repeat(title.textContent.length) + '\n\n';
+            }
+            
+            const items = section.querySelectorAll('.result-item');
+            items.forEach(item => {
+                const label = item.querySelector('.result-label');
+                const value = item.querySelector('.result-value');
+                if (label && value) {
+                    text += `${label.textContent} ${value.textContent}\n`;
+                }
+            });
+            
+            const subnets = section.querySelectorAll('.subnet-item');
+            subnets.forEach(subnet => {
+                text += '\n' + subnet.textContent.trim().replace(/\s+/g, ' ') + '\n';
+            });
+            
+            copyToClipboard(text.trim(), button);
+        }
+        
+        function copyAllResults(resultsId) {
+            const resultsDiv = document.getElementById(resultsId);
+            let text = '╔══════════════════════════════════════════════════╗\n';
+            text += '║       SUBNETTING CALCULATION RESULTS            ║\n';
+            text += '╚══════════════════════════════════════════════════╝\n\n';
+            
+            const sections = resultsDiv.querySelectorAll('.result-section');
+            sections.forEach((section, index) => {
+                const title = section.querySelector('h3');
+                if (title) {
+                    text += title.textContent + '\n';
+                    text += '─'.repeat(50) + '\n';
+                }
+                
+                const items = section.querySelectorAll('.result-item');
+                items.forEach(item => {
+                    const label = item.querySelector('.result-label');
+                    const value = item.querySelector('.result-value');
+                    if (label && value) {
+                        text += `${label.textContent} ${value.textContent}\n`;
+                    }
+                });
+                
+                const subnets = section.querySelectorAll('.subnet-item');
+                subnets.forEach(subnet => {
+                    text += '\n' + subnet.textContent.trim().replace(/\s+/g, ' ') + '\n';
+                });
+                
+                if (index < sections.length - 1) {
+                    text += '\n' + '═'.repeat(50) + '\n\n';
+                }
+            });
+            
+            text += '\n' + '─'.repeat(50) + '\n';
+            text += 'Generated by Ultimate Subnetting Calculator\n';
+            
+            const button = event.target;
+            copyToClipboard(text, button);
+        }
+        
+        function switchTab(index) {
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+            currentTab = index;
+        }
+        
+        function parseCIDR(mask) {
+            if (mask.startsWith('/')) {
+                return parseInt(mask.substring(1));
+            }
+            const parts = mask.split('.');
+            if (parts.length === 4) {
+                let cidr = 0;
+                parts.forEach(part => {
+                    const num = parseInt(part);
+                    cidr += num.toString(2).split('1').length - 1;
+                });
+                return cidr;
+            }
+            return parseInt(mask);
+        }
+        
+        function cidrToMask(cidr) {
+            const mask = [];
+            for (let i = 0; i < 4; i++) {
+                const n = Math.min(cidr, 8);
+                mask.push(256 - Math.pow(2, 8 - n));
+                cidr -= n;
+            }
+            return mask.join('.');
+        }
+        
+        function ipToInt(ip) {
+            return ip.split('.').reduce((int, oct) => (int << 8) + parseInt(oct), 0) >>> 0;
+        }
+        
+        function intToIp(int) {
+            return [(int >>> 24) & 0xFF, (int >>> 16) & 0xFF, (int >>> 8) & 0xFF, int & 0xFF].join('.');
+        }
+        
+        function getNetworkAddress(ip, cidr) {
+            const ipInt = ipToInt(ip);
+            const mask = -1 << (32 - cidr);
+            return intToIp((ipInt & mask) >>> 0);
+        }
+        
+        function getBroadcast(ip, cidr) {
+            const ipInt = ipToInt(ip);
+            const mask = -1 << (32 - cidr);
+            const broadcast = (ipInt & mask) | ~mask;
+            return intToIp(broadcast >>> 0);
+        }
+        
+        function toBinary(ip) {
+            return ip.split('.').map(oct => 
+                parseInt(oct).toString(2).padStart(8, '0')
+            ).join('.');
+        }
+        
+        function showError(resultId, message) {
+            const results = document.getElementById(resultId);
+            results.className = 'results show';
+            results.innerHTML = `<div class="error">❌ ${message}</div>`;
+        }
+        
+        function calculateEqualSubnets() {
+            const net = document.getElementById('net1').value.trim();
+            const mask = document.getElementById('mask1').value.trim();
+            const subnetsNeeded = parseInt(document.getElementById('subnets1').value);
+            
+            if (!net || !mask || !subnetsNeeded) {
+                showError('results1', 'Please fill in all fields');
+                return;
+            }
+            
+            const cidr = parseCIDR(mask);
+            const bitsNeeded = Math.ceil(Math.log2(subnetsNeeded));
+            const newCidr = cidr + bitsNeeded;
+            
+            if (newCidr > 30) {
+                showError('results1', 'Too many subnets requested for this network');
+                return;
+            }
+            
+            const hostBits = 32 - newCidr;
+            const hostsPerSubnet = Math.pow(2, hostBits) - 2;
+            const actualSubnets = Math.pow(2, bitsNeeded);
+            const blockSize = Math.pow(2, hostBits);
+            
+            let html = `
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>📋 Summary</h3>
+                    <div class="result-item">
+                        <span class="result-label">Original Network:</span>
+                        <span class="result-value">${net}/${cidr}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">New Subnet Mask:</span>
+                        <span class="result-value">/${newCidr} (${cidrToMask(newCidr)})</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Bits Borrowed:</span>
+                        <span class="result-value">${bitsNeeded}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total Subnets Created:</span>
+                        <span class="result-value">${actualSubnets}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Hosts per Subnet:</span>
+                        <span class="result-value">${hostsPerSubnet}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Block Size:</span>
+                        <span class="result-value">${blockSize}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>🌐 All Subnets</h3>
+                    <div class="subnet-list">
+            `;
+            
+            const baseInt = ipToInt(net);
+            for (let i = 0; i < Math.min(actualSubnets, 20); i++) {
+                const subnetInt = baseInt + (i * blockSize);
+                const subnetAddr = intToIp(subnetInt);
+                const broadcastAddr = intToIp(subnetInt + blockSize - 1);
+                const firstUsable = intToIp(subnetInt + 1);
+                const lastUsable = intToIp(subnetInt + blockSize - 2);
+                
+                html += `
+                    <div class="subnet-item">
+                        <strong>Subnet ${i + 1}:</strong> ${subnetAddr}/${newCidr}<br>
+                        Network: ${subnetAddr} | Broadcast: ${broadcastAddr}<br>
+                        Usable Range: ${firstUsable} - ${lastUsable}
+                    </div>
+                `;
+            }
+            
+            if (actualSubnets > 20) {
+                html += `<div class="subnet-item"><em>... and ${actualSubnets - 20} more subnets</em></div>`;
+            }
+            
+            html += `</div></div>`;
+            html += `<button class="copy-all-btn" onclick="copyAllResults('results1')">📋 Copy All Results</button>`;
+            
+            const results = document.getElementById('results1');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function calculateHostsSubnet() {
+            const net = document.getElementById('net2').value.trim();
+            const mask = document.getElementById('mask2').value.trim();
+            const hostsNeeded = parseInt(document.getElementById('hosts2').value);
+            
+            if (!net || !mask || !hostsNeeded) {
+                showError('results2', 'Please fill in all fields');
+                return;
+            }
+            
+            const cidr = parseCIDR(mask);
+            const hostBitsNeeded = Math.ceil(Math.log2(hostsNeeded + 2));
+            const newCidr = 32 - hostBitsNeeded;
+            
+            if (newCidr < cidr) {
+                showError('results2', 'Not enough address space in this network for the required hosts');
+                return;
+            }
+            
+            const actualHosts = Math.pow(2, hostBitsNeeded) - 2;
+            const subnetsAvailable = Math.pow(2, newCidr - cidr);
+            const blockSize = Math.pow(2, hostBitsNeeded);
+            
+            let html = `
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>📋 Subnet Configuration</h3>
+                    <div class="result-item">
+                        <span class="result-label">Hosts Required:</span>
+                        <span class="result-value">${hostsNeeded}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Subnet Mask Needed:</span>
+                        <span class="result-value">/${newCidr} (${cidrToMask(newCidr)})</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Actual Hosts Available:</span>
+                        <span class="result-value">${actualHosts}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Host Bits:</span>
+                        <span class="result-value">${hostBitsNeeded}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Possible Subnets:</span>
+                        <span class="result-value">${subnetsAvailable}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Block Size:</span>
+                        <span class="result-value">${blockSize}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>🌐 Example Subnets</h3>
+                    <div class="subnet-list">
+            `;
+            
+            const baseInt = ipToInt(net);
+            for (let i = 0; i < Math.min(subnetsAvailable, 10); i++) {
+                const subnetInt = baseInt + (i * blockSize);
+                const subnetAddr = intToIp(subnetInt);
+                const broadcastAddr = intToIp(subnetInt + blockSize - 1);
+                const firstUsable = intToIp(subnetInt + 1);
+                const lastUsable = intToIp(subnetInt + blockSize - 2);
+                
+                html += `
+                    <div class="subnet-item">
+                        <strong>Subnet ${i + 1}:</strong> ${subnetAddr}/${newCidr}<br>
+                        Usable Range: ${firstUsable} - ${lastUsable}
+                    </div>
+                `;
+            }
+            
+            html += `</div></div>`;
+            html += `<button class="copy-all-btn" onclick="copyAllResults('results2')">📋 Copy All Results</button>`;
+            
+            const results = document.getElementById('results2');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function addVLSMRow() {
+            const container = document.getElementById('vlsmInputs');
+            const newRow = document.createElement('div');
+            newRow.className = 'vlsm-input';
+            newRow.innerHTML = `
+                <div class="vlsm-row">
+                    <div>
+                        <label>Department/Subnet Name</label>
+                        <input type="text" class="vlsm-name" placeholder="Department Name">
+                    </div>
+                    <div>
+                        <label>Hosts Needed</label>
+                        <input type="number" class="vlsm-hosts" placeholder="50" min="2">
+                    </div>
+                    <button class="remove-btn" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+            `;
+            container.appendChild(newRow);
+        }
+        
+        function calculateVLSM() {
+            const net = document.getElementById('netVLSM').value.trim();
+            const mask = document.getElementById('maskVLSM').value.trim();
+            
+            if (!net || !mask) {
+                showError('resultsVLSM', 'Please fill in base network information');
+                return;
+            }
+            
+            const names = Array.from(document.querySelectorAll('.vlsm-name')).map(e => e.value.trim());
+            const hosts = Array.from(document.querySelectorAll('.vlsm-hosts')).map(e => parseInt(e.value));
+            
+            if (names.length === 0 || hosts.some(h => !h)) {
+                showError('resultsVLSM', 'Please add at least one subnet requirement');
+                return;
+            }
+            
+            const cidr = parseCIDR(mask);
+            const subnets = names.map((name, i) => ({
+                name: name || `Subnet ${i + 1}`,
+                hostsNeeded: hosts[i],
+                hostBits: Math.ceil(Math.log2(hosts[i] + 2)),
+                cidr: 32 - Math.ceil(Math.log2(hosts[i] + 2)),
+                actualHosts: Math.pow(2, Math.ceil(Math.log2(hosts[i] + 2))) - 2
+            }));
+            
+            subnets.sort((a, b) => b.hostBits - a.hostBits);
+            
+            let currentIP = ipToInt(net);
+            let html = '<div class="result-section"><button class="copy-btn" onclick="copySection(this)">📋 Copy</button><h3>🎯 VLSM Allocation</h3><div class="subnet-list">';
+            
+            subnets.forEach((subnet, i) => {
+                const blockSize = Math.pow(2, subnet.hostBits);
+                const networkAddr = intToIp(currentIP);
+                const broadcastAddr = intToIp(currentIP + blockSize - 1);
+                const firstUsable = intToIp(currentIP + 1);
+                const lastUsable = intToIp(currentIP + blockSize - 2);
+                
+                html += `
+                    <div class="subnet-item">
+                        <strong>${subnet.name}</strong><br>
+                        Network: ${networkAddr}/${subnet.cidr} (${cidrToMask(subnet.cidr)})<br>
+                        Hosts Needed: ${subnet.hostsNeeded} | Hosts Available: ${subnet.actualHosts}<br>
+                        Usable Range: ${firstUsable} - ${lastUsable}<br>
+                        Broadcast: ${broadcastAddr}
+                    </div>
+                `;
+                
+                currentIP += blockSize;
+            });
+            
+            const totalUsed = intToIp(currentIP - 1);
+            html += `</div></div>
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>📊 Summary</h3>
+                    <div class="result-item">
+                        <span class="result-label">Base Network:</span>
+                        <span class="result-value">${net}/${cidr}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Address Space Used Up To:</span>
+                        <span class="result-value">${totalUsed}</span>
+                    </div>
+                </div>
+            `;
+            html += `<button class="copy-all-btn" onclick="copyAllResults('resultsVLSM')">📋 Copy All Results</button>`;
+            
+            const results = document.getElementById('resultsVLSM');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function analyzeIP() {
+            const ip = document.getElementById('ip4').value.trim();
+            const mask = document.getElementById('mask4').value.trim();
+            
+            if (!ip || !mask) {
+                showError('results4', 'Please fill in all fields');
+                return;
+            }
+            
+            const cidr = parseCIDR(mask);
+            const networkAddr = getNetworkAddress(ip, cidr);
+            const broadcastAddr = getBroadcast(ip, cidr);
+            const hostBits = 32 - cidr;
+            const totalHosts = Math.pow(2, hostBits);
+            const usableHosts = totalHosts - 2;
+            const blockSize = totalHosts;
+            
+            const networkInt = ipToInt(networkAddr);
+            const firstUsable = intToIp(networkInt + 1);
+            const lastUsable = intToIp(networkInt + totalHosts - 2);
+            
+            const ipClass = parseInt(ip.split('.')[0]) < 128 ? 'A' : 
+                           parseInt(ip.split('.')[0]) < 192 ? 'B' : 'C';
+            
+            let html = `
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>🔍 IP Address Analysis</h3>
+                    <div class="result-item">
+                        <span class="result-label">IP Address:</span>
+                        <span class="result-value">${ip}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">IP Binary:</span>
+                        <span class="result-value binary">${toBinary(ip)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">IP Class:</span>
+                        <span class="result-value">Class ${ipClass}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>🌐 Subnet Information</h3>
+                    <div class="result-item">
+                        <span class="result-label">Subnet Mask:</span>
+                        <span class="result-value">/${cidr} (${cidrToMask(cidr)})</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Mask Binary:</span>
+                        <span class="result-value binary">${toBinary(cidrToMask(cidr))}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Network Address:</span>
+                        <span class="result-value">${networkAddr}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Broadcast Address:</span>
+                        <span class="result-value">${broadcastAddr}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">First Usable IP:</span>
+                        <span class="result-value">${firstUsable}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Last Usable IP:</span>
+                        <span class="result-value">${lastUsable}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Usable Hosts:</span>
+                        <span class="result-value">${usableHosts}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total Addresses:</span>
+                        <span class="result-value">${totalHosts}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Block Size:</span>
+                        <span class="result-value">${blockSize}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Host Bits:</span>
+                        <span class="result-value">${hostBits}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Network Bits:</span>
+                        <span class="result-value">${cidr}</span>
+                    </div>
+                </div>
+            `;
+            html += `<button class="copy-all-btn" onclick="copyAllResults('results4')">📋 Copy All Results</button>`;
+            
+            const results = document.getElementById('results4');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function checkSameSubnet() {
+            const ip1 = document.getElementById('ip5a').value.trim();
+            const ip2 = document.getElementById('ip5b').value.trim();
+            const mask = document.getElementById('mask5').value.trim();
+            
+            if (!ip1 || !ip2 || !mask) {
+                showError('results5', 'Please fill in all fields');
+                return;
+            }
+            
+            const cidr = parseCIDR(mask);
+            const network1 = getNetworkAddress(ip1, cidr);
+            const network2 = getNetworkAddress(ip2, cidr);
+            const sameSubnet = network1 === network2;
+            
+            const broadcast1 = getBroadcast(ip1, cidr);
+            const hostBits = 32 - cidr;
+            const usableHosts = Math.pow(2, hostBits) - 2;
+            
+            let html = `
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>${sameSubnet ? '✅' : '❌'} ${sameSubnet ? 'Same Subnet!' : 'Different Subnets!'}</h3>
+                    <div class="result-item">
+                        <span class="result-label">Result:</span>
+                        <span class="result-value">${sameSubnet ? 'These IPs are in the SAME subnet' : 'These IPs are in DIFFERENT subnets'}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <button class="copy-btn" onclick="copySection(this)">📋 Copy</button>
+                    <h3>🔍 First IP (${ip1})</h3>
+                    <div class="result-item">
+                        <span class="result-label">Network Address:</span>
+                        <span class="result-value">${network1}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Broadcast Address:</span>
+                        <span class="result-value">${broadcast1}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>🔍 Second IP (${ip2})</h3>
+                    <div class="result-item">
+                        <span class="result-label">Network Address:</span>
+                        <span class="result-value">${network2}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Broadcast Address:</span>
+                        <span class="result-value">${getBroadcast(ip2, cidr)}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>📊 Subnet Details</h3>
+                    <div class="result-item">
+                        <span class="result-label">Subnet Mask:</span>
+                        <span class="result-value">/${cidr} (${cidrToMask(cidr)})</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Hosts per Subnet:</span>
+                        <span class="result-value">${usableHosts}</span>
+                    </div>
+                </div>
+            `;
+            
+            const results = document.getElementById('results5');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function convertNotation() {
+            const input = document.getElementById('convert6').value.trim();
+            
+            if (!input) {
+                showError('results6', 'Please enter a subnet mask');
+                return;
+            }
+            
+            let cidr, dotted;
+            
+            if (input.startsWith('/')) {
+                cidr = parseInt(input.substring(1));
+                dotted = cidrToMask(cidr);
+            } else if (input.includes('.')) {
+                dotted = input;
+                cidr = parseCIDR(input);
+            } else {
+                cidr = parseInt(input);
+                dotted = cidrToMask(cidr);
+            }
+            
+            const hostBits = 32 - cidr;
+            const hosts = Math.pow(2, hostBits) - 2;
+            const blockSize = Math.pow(2, hostBits);
+            const binary = toBinary(dotted);
+            
+            const wildcardMask = dotted.split('.').map(oct => 255 - parseInt(oct)).join('.');
+            
+            let html = `
+                <div class="result-section">
+                    <h3>🔄 Conversion Results</h3>
+                    <div class="result-item">
+                        <span class="result-label">CIDR Notation:</span>
+                        <span class="result-value">/${cidr}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Dotted Decimal:</span>
+                        <span class="result-value">${dotted}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Binary:</span>
+                        <span class="result-value binary">${binary}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Wildcard Mask:</span>
+                        <span class="result-value">${wildcardMask}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>📊 Subnet Characteristics</h3>
+                    <div class="result-item">
+                        <span class="result-label">Network Bits:</span>
+                        <span class="result-value">${cidr}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Host Bits:</span>
+                        <span class="result-value">${hostBits}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Usable Hosts:</span>
+                        <span class="result-value">${hosts.toLocaleString()}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Block Size:</span>
+                        <span class="result-value">${blockSize.toLocaleString()}</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>💡 Common Uses</h3>
+                    <div style="padding: 10px 0;">
+            `;
+            
+            if (cidr === 32) html += `<p>Single host route (point-to-point)</p>`;
+            else if (cidr === 30) html += `<p>Point-to-point links (2 usable hosts)</p>`;
+            else if (cidr === 29) html += `<p>Very small subnet (6 usable hosts)</p>`;
+            else if (cidr === 28) html += `<p>Small office subnet (14 usable hosts)</p>`;
+            else if (cidr === 27) html += `<p>Small department (30 usable hosts)</p>`;
+            else if (cidr === 26) html += `<p>Medium department (62 usable hosts)</p>`;
+            else if (cidr === 25) html += `<p>Large department (126 usable hosts)</p>`;
+            else if (cidr === 24) html += `<p>Standard Class C network (254 usable hosts)</p>`;
+            else if (cidr === 16) html += `<p>Class B network (65,534 usable hosts)</p>`;
+            else if (cidr === 8) html += `<p>Class A network (16,777,214 usable hosts)</p>`;
+            else html += `<p>Custom subnet configuration</p>`;
+            
+            html += `</div></div>`;
+            
+            const results = document.getElementById('results6');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
